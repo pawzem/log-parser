@@ -5,13 +5,14 @@ from datetime import datetime
 
 
 def main():
-    log_file_name = sys.argv[1]
-    if not os.path.isfile(log_file_name):
-        print("File path {} does not exist. Exiting...".format(log_file_name))
+    log_file_location = sys.argv[1]
+    print("reading from file '{}'".format(log_file_location))
+    if not os.path.isfile(log_file_location):
+        print("File path {} does not exist. Exiting...".format(log_file_location))
         sys.exit()
 
     try:
-        log_file = open(log_file_name, "r", encoding="utf8")
+        log_file = open(log_file_location, "r", encoding="utf8")
         requests = {}
         order_counter = 0
         occurrence_order = {}
@@ -21,13 +22,20 @@ def main():
         sorted_requests = sort_requests(requests, occurrence_order)
         durations = calculate_durations(sorted_requests)
 
-        print("id\tcorrelation_id\tduration")
-        current_id = 0
-        for correlation_id, duration in durations:
-            print("{}\t{}\t{}".format(current_id, correlation_id, duration))
-            current_id += 1
+        print_table(durations)
     finally:
         log_file.close()
+
+
+def print_table(durations):
+    output_file = sys.argv[2]
+    print("writing to file '{}'".format(output_file))
+    output_file = open(output_file, 'wt', encoding="utf8")
+    output_file.write("id\tcorrelation_id\tduration\n")
+    current_id = 0
+    for correlation_id, duration in durations:
+        output_file.write("{}\t{}\t{}\n".format(current_id, correlation_id, duration))
+        current_id += 1
 
 
 def sort_requests(requests, occurrence_order):
