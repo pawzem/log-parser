@@ -53,18 +53,21 @@ def calculate_durations(sorted_requests):
 
 
 def parse_line(line, requests, occurrence_order, order_counter):
-    regex = r'(.*)  INFO \[(.*),(.*),(.*),(.*)\]'
+    regex = r'(.*)  INFO \[(.*),(.*),(.*),(.*)\].*(sending|received)'
     compiled_regex = re.compile(regex)
     match = compiled_regex.search(line)
     if match is not None:
+        print("matched line: {}".format(line))
         time = datetime.strptime(match.group(1), "%Y-%m-%d %H:%M:%S.%f")
         base = match.group(3)
         if base is '':
             return
         if base not in requests:
+            print("found new base correlation_id: '{}' with time: '{}'".format(base, time))
             occurrence_order[base] = order_counter
             requests[base] = (time, None)
         elif requests[base][1] is None:
+            print("found second base correlation_id: '{}' with time: '{}'".format(base, time))
             requests[base] = (requests[base][0], time)
         else:
             raise Exception("Found duplicated value for {}".format(base))
